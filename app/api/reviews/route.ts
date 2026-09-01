@@ -6,7 +6,7 @@ import { SubmitReviewRequest, Review } from '@/lib/types';
 export async function POST(request: NextRequest) {
   try {
     const body: SubmitReviewRequest = await request.json();
-    const { formId, reviewer, scores } = body;
+    const { formId, reviewer, scores, selfContributionPercent, selfRatings, peerRatings } = body;
     
     const form = await getForm(formId);
     if (!form) {
@@ -24,7 +24,11 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    const error = validateReview(reviewer, scores, form.members);
+    const error = validateReview(reviewer, scores, form.members, form.criteria, {
+      selfContributionPercent,
+      selfRatings,
+      peerRatings,
+    });
     if (error) {
       return NextResponse.json({ error }, { status: 400 });
     }
@@ -32,7 +36,10 @@ export async function POST(request: NextRequest) {
     const review: Review = {
       reviewer,
       scores,
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
+      ...(selfContributionPercent !== undefined ? { selfContributionPercent } : {}),
+      ...(selfRatings ? { selfRatings } : {}),
+      ...(peerRatings ? { peerRatings } : {}),
     };
     
     const updatedForm = await addReview(formId, review);

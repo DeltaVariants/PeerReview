@@ -9,13 +9,21 @@ export async function createForm(form: Form): Promise<Form> {
   return form;
 }
 
+function normalizeForm(form: Form): Form {
+  return {
+    ...form,
+    criteria: form.criteria ?? [],
+    reviews: form.reviews ?? [],
+  };
+}
+
 export async function getForm(formId: string): Promise<Form | null> {
   try {
     await connectDB();
     const form = await FormModel.findOne({ id: formId }).lean();
     if (!form) return null;
     
-    return form as Form;
+    return normalizeForm(form as Form);
   } catch (error) {
     console.error('Error getting form:', error);
     return null;
@@ -27,7 +35,7 @@ export async function getAllForms(): Promise<Form[]> {
     await connectDB();
     const forms = await FormModel.find().sort({ createdAt: -1 }).lean();
     
-    return forms as Form[];
+    return forms.map(form => normalizeForm(form as Form));
   } catch (error) {
     console.error('Error getting all forms:', error);
     return [];
@@ -49,7 +57,7 @@ export async function addReview(formId: string, review: Review): Promise<Form | 
     form.reviews.push(review);
     await form.save();
     
-    return form.toObject() as Form;
+    return normalizeForm(form.toObject() as Form);
   } catch (error) {
     console.error('Error adding review:', error);
     return null;

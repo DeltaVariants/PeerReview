@@ -125,9 +125,9 @@ export default function ReviewSelectPage() {
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
             <h3 className="font-semibold text-blue-900 mb-2">Lưu ý:</h3>
             <ul className="text-sm text-blue-800 space-y-1">
-              <li>• Bạn có 100 điểm để phân bổ cho các thành viên khác</li>
-              <li>• Không được chấm điểm cho bản thân</li>
-              <li>• Tổng điểm phải bằng 100</li>
+              <li>• Bước 1: tự đánh giá % đóng góp và kỹ năng của bạn</li>
+              <li>• Bước 2: phân bổ 100 điểm và chấm rubric 1–5 cho người khác</li>
+              <li>• Không được chấm pie 100 điểm cho bản thân</li>
               <li>• Mỗi người chỉ được submit 1 lần</li>
             </ul>
           </div>

@@ -6,6 +6,7 @@ import { isLeaderAuthenticated } from '@/lib/auth';
 import { ReportData } from '@/lib/types';
 import { Trophy, Users, CheckCircle, XCircle, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
+import { JohariSection } from '@/components/JohariSection';
 
 export default function ReportPage() {
   const [report, setReport] = useState<ReportData | null>(null);
@@ -217,6 +218,8 @@ export default function ReportPage() {
             </table>
           </div>
         </div>
+
+        <JohariSection report={report} />
       </div>
     </div>
   );

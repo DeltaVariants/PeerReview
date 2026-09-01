@@ -3,12 +3,18 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { isLeaderAuthenticated } from '@/lib/auth';
+import { DEFAULT_CRITERIA_NAMES, MAX_CRITERIA, MIN_CRITERIA } from '@/lib/criteria';
 import { Plus, X, Copy, Check } from 'lucide-react';
+
+type CriterionDraft = { key: string; name: string };
 
 export default function CreateFormPage() {
   const [formName, setFormName] = useState('');
   const [memberCount, setMemberCount] = useState(3);
   const [members, setMembers] = useState<string[]>(['', '', '']);
+  const [criteria, setCriteria] = useState<CriterionDraft[]>(() =>
+    DEFAULT_CRITERIA_NAMES.map((name, index) => ({ key: `default-${index}`, name }))
+  );
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [createdFormId, setCreatedFormId] = useState<string | null>(null);
@@ -50,7 +56,8 @@ export default function CreateFormPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: formName,
-          members: filteredMembers
+          members: filteredMembers,
+          criteria: criteria.map(c => ({ name: c.name })),
         })
       });
 
@@ -175,6 +182,68 @@ export default function CreateFormPage() {
                 onChange={(e) => setMemberCount(parseInt(e.target.value) || 2)}
                 className="w-full px-4 py-3 border-2 border-gray-400 bg-white text-gray-900 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
               />
+            </div>
+
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  Tiêu chí đánh giá (thang 1–5) *
+                </label>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (criteria.length >= MAX_CRITERIA) return;
+                    setCriteria(current => [
+                      ...current,
+                      { key: `c-${Date.now()}`, name: '' },
+                    ]);
+                  }}
+                  disabled={criteria.length >= MAX_CRITERIA}
+                  className="inline-flex items-center gap-1 text-sm font-semibold text-blue-600 hover:text-blue-700 disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  <Plus size={16} />
+                  Thêm tiêu chí
+                </button>
+              </div>
+              <p className="text-sm text-gray-500 mb-3">
+                Thành viên sẽ tự đánh giá rồi chấm đồng đội theo các tiêu chí này.
+              </p>
+              <div className="space-y-3">
+                {criteria.map((criterion, index) => (
+                  <div key={criterion.key} className="flex gap-2">
+                    <span className="flex items-center justify-center w-10 h-12 bg-gray-100 rounded-lg font-semibold text-gray-600">
+                      {index + 1}
+                    </span>
+                    <input
+                      type="text"
+                      value={criterion.name}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setCriteria(current =>
+                          current.map(item =>
+                            item.key === criterion.key ? { ...item, name: value } : item
+                          )
+                        );
+                      }}
+                      className="flex-1 px-4 py-3 border-2 border-gray-400 bg-white text-gray-900 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none placeholder:text-gray-500"
+                      placeholder={`Tên tiêu chí ${index + 1}`}
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (criteria.length <= MIN_CRITERIA) return;
+                        setCriteria(current => current.filter(item => item.key !== criterion.key));
+                      }}
+                      disabled={criteria.length <= MIN_CRITERIA}
+                      className="flex items-center justify-center w-12 h-12 rounded-lg border-2 border-gray-200 text-gray-500 hover:text-red-600 hover:border-red-200 disabled:opacity-30 disabled:cursor-not-allowed"
+                      aria-label={`Xóa tiêu chí ${criterion.name || index + 1}`}
+                    >
+                      <X size={18} />
+                    </button>
+                  </div>
+                ))}
+              </div>
             </div>
 
             <div>
